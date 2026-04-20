@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SemesterSpend — Student-Centered Budgeting</title>
+  <meta name="description" content="Web-based budgeting for college students: semester timelines, weekly spending, irregular income." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f0ede6;
+      --surface: #fffdf8;
+      --ink: #1c1b19;
+      --muted: #6b6560;
+      --accent: #2d6a4f;
+      --accent-2: #40916c;
+      --accent-soft: #d8f3dc;
+      --warn: #bc6c25;
+      --border: #ddd5c8;
+      --radius: 14px;
+      --shadow: 0 12px 40px rgba(28, 27, 25, 0.08);
+      --max: 960px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 1rem;
+      line-height: 1.55;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    h1, h2, h3 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    a { color: var(--accent); }
+    a:hover { text-decoration: underline; }
+
+    /* —— Header —— */
+    header {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(125deg, #0f2918 0%, #1b4332 40%, #2d6a4f 78%, #52b788 100%);
+      color: #fff;
+      padding: 2rem 1.25rem 2.5rem;
+    }
+    header::before {
+      content: "";
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      top: -120px;
+      right: -80px;
+    }
+    header::after {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      bottom: -60px;
+      left: 10%;
+    }
+    .header-inner {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+    .tagline {
+      font-size: 1.05rem;
+      opacity: 0.92;
+      max-width: 26rem;
+      margin: 0.4rem 0 0;
+    }
+    nav {
+      margin-top: 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 1.1rem;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      opacity: 0.88;
+    }
+    nav a:hover { opacity: 1; text-decoration: underline; }
+
+    /* —— Hero —— */
+    .hero {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 2.25rem 1.25rem 0.5rem;
+      display: grid;
+      gap: 1.75rem;
+      align-items: center;
+    }
+    @media (min-width: 720px) {
+      .hero { grid-template-columns: 1fr 1fr; padding-top: 2.75rem; }
+    }
+    .hero-copy h2 {
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+      color: #1b4332;
+      margin: 0 0 0.65rem;
+    }
+    .hero-copy p { color: var(--muted); margin: 0; font-size: 0.98rem; }
+    .hero-art {
+      display: flex;
+      justify-content: center;
+    }
+    .hero-art svg {
+      width: min(100%, 340px);
+      height: auto;
+      filter: drop-shadow(0 16px 32px rgba(27, 67, 50, 0.15));
+    }
+
+    main {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 1.25rem 3.5rem;
+    }
+
+    section {
+      margin-bottom: 2.75rem;
+      scroll-margin-top: 0.75rem;
+    }
+    section > h2 {
+      font-size: 1.45rem;
+      margin: 0 0 1rem;
+      color: #1b4332;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-num {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--accent-soft);
+      color: #1b4332;
+      width: 1.65rem;
+      height: 1.65rem;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    /* Split: image + text */
+    .split {
+      display: grid;
+      gap: 1.25rem;
+      align-items: start;
+    }
+    @media (min-width: 640px) {
+      .split { grid-template-columns: 0.9fr 1.1fr; }
+    }
+    .img-placeholder {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      aspect-ratio: 4/3;
+      background: linear-gradient(145deg, #e8f5e9 0%, #fff8e7 50%, #d8f3dc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 1rem;
+    }
+    .img-placeholder svg { width: 72%; max-width: 200px; height: auto; opacity: 0.85; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.75rem;
+    }
+    .chip {
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--border);
+      color: #1b4332;
+    }
+
+    ul.tight {
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+    ul.tight li { margin-bottom: 0.3rem; }
+
+    /* Feature grid */
+    .features {
+      display: grid;
+      gap: 0.85rem;
+    }
+    @media (min-width: 560px) {
+      .features { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 800px) {
+      .features { grid-template-columns: repeat(3, 1fr); }
+    }
+    .feature {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      box-shadow: 0 4px 16px rgba(28, 27, 25, 0.04);
+    }
+    .feature .icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .feature h3 {
+      font-size: 0.95rem;
+      margin: 0 0 0.25rem;
+      font-family: "DM Sans", sans-serif;
+      font-weight: 700;
+    }
+    .feature p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    /* Workflow steps */
+    .steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: space-between;
+      margin: 1rem 0 0;
+      counter-reset: step;
+    }
+    .step {
+      flex: 1 1 140px;
+      text-align: center;
+      position: relative;
+    }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      margin: 0 auto 0.4rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .step span {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: block;
+      line-height: 1.35;
+    }
+
+    /* Mock dashboard */
+    .mock-frame {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      background: linear-gradient(180deg, #faf8f4 0%, #fff 100%);
+      margin-top: 0.75rem;
+    }
+    .mock-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .mock-bars { display: grid; gap: 0.45rem; }
+    .mock-bar {
+      height: 9px;
+      border-radius: 6px;
+      background: #e8e4dc;
+      overflow: hidden;
+    }
+    .mock-bar > span {
+      display: block;
+      height: 100%;
+      border-radius: 6px;
+      background: var(--accent);
+    }
+    .mock-bar.warn > span { background: var(--warn); }
+    .mock-alert {
+      margin-top: 0.85rem;
+      padding: 0.55rem 0.75rem;
+      background: #fff3cd;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      color: #664d03;
+    }
+
+    /* Strategy mini-cards */
+    .mini-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+    @media (min-width: 600px) {
+      .mini-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .mini {
+      border-radius: var(--radius);
+      padding: 1rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .mini strong {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.35rem;
+    }
+    .mini p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+
+    /* Impact */
+    .impact-row {
+      display: grid;
+      gap: 0.85rem;
+    }
+    @media (min-width: 560px) {
+      .impact-row { grid-template-columns: 1fr 1fr; }
+    }
+    .impact-card {
+      border-radius: var(--radius);
+      padding: 1.1rem;
+      color: #fff;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .impact-card.org {
+      background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    }
+    .impact-card.soc {
+      background: linear-gradient(135deg, #bc6c25, #dda15e);
+    }
+    .impact-card h3 {
+      margin: 0 0 0.35rem;
+      font-size: 1.05rem;
+      color: #fff;
+    }
+    .impact-card p { margin: 0; font-size: 0.88rem; opacity: 0.92; line-height: 1.4; }
+
+    /* Team */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    @media (min-width: 640px) {
+      .team-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    .person {
+      text-align: center;
+    }
+    .photo-slot {
+      width: 100%;
+      aspect-ratio: 1;
+      max-width: 140px;
+      margin: 0 auto 0.5rem;
+      border-radius: 50%;
+      border: 3px dashed var(--border);
+      background: repeating-linear-gradient(
+        -45deg,
+        #f5f2eb,
+        #f5f2eb 8px,
+        #ebe6dc 8px,
+        #ebe6dc 16px
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+      padding: 0.5rem;
+    }
+    .person .name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    .person .role {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 0.15rem 0 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.75rem 1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .team-photo {
+      width: 100%;
+      max-width: 140px;
+      aspect-ratio: 1;
+      margin: 0 auto 0.5rem;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--border);
+      display: block;
+      background: #f5f2eb;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1 style="margin: 0; font-size: clamp(1.85rem, 4.5vw, 2.5rem);">SemesterSpend</h1>
+      <p class="tagline">Budget by semester and week—by college students, for college students.</p>
+      <nav aria-label="Page sections">
+        <a href="#problem">Problem</a>
+        <a href="#solution">Solution</a>
+        <a href="#strategy">Strategy</a>
+        <a href="#impact">Impact</a>
+        <a href="#team">Team</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-copy">
+      <h2>Money shows up in chunks. Bills do too.</h2>
+      <p>We built a simple web app idea that maps aid, paychecks, rent, and weekly spending on one timeline—so you see what’s left before midterms, not after.</p>
+      <div class="chips">
+        <span class="chip">Irregular income</span>
+        <span class="chip">Big semester costs</span>
+        <span class="chip">Weekly pace</span>
+      </div>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="24" y="40" width="232" height="150" rx="16" fill="#fffdf8" stroke="#1b4332" stroke-width="2"/>
+        <rect x="44" y="64" width="88" height="10" rx="4" fill="#d8f3dc"/>
+        <rect x="44" y="84" width="120" height="8" rx="3" fill="#e4dfd4"/>
+        <rect x="44" y="100" width="100" height="8" rx="3" fill="#e4dfd4"/>
+        <rect x="180" y="64" width="56" height="44" rx="8" fill="#2d6a4f"/>
+        <text x="208" y="92" text-anchor="middle" fill="#fff" font-size="11" font-family="system-ui,sans-serif" font-weight="700">$</text>
+        <rect x="44" y="128" width="192" height="44" rx="10" fill="#f0ede6" stroke="#bc6c25" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="52" y="152" fill="#664d03" font-size="9" font-family="system-ui,sans-serif">Alert: slow down social this week</text>
+        <circle cx="230" cy="158" r="28" fill="#52b788" opacity="0.35"/>
+        <circle cx="50" cy="178" r="18" fill="#40916c" opacity="0.25"/>
+      </svg>
+    </div>
+  </div>
+
+  <main>
+    <section id="problem">
+      <h2><span class="section-num">1</span> The opportunity</h2>
+      <div class="split">
+        <figure class="img-placeholder" role="presentation">
+          <svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M30 120 L100 45 L140 80 L170 50 L170 120 Z" fill="#c8e6c9" opacity="0.6"/>
+            <rect x="55" y="70" width="90" height="55" rx="4" fill="#fff" stroke="#1b4332" stroke-width="1.5"/>
+            <rect x="65" y="82" width="35" height="30" fill="#2d6a4f" opacity="0.2"/>
+            <circle cx="125" cy="97" r="12" fill="#bc6c25" opacity="0.35"/>
+            <rect x="40" y="115" width="120" height="6" rx="2" fill="#ddd5c8"/>
+          </svg>
+        </figure>
+        <div>
+          <div class="card" style="box-shadow: none;">
+            <p style="margin: 0 0 0.6rem; font-size: 0.95rem;"><strong>Who:</strong> Students paying their own way + families &amp; schools who care about stability.</p>
+            <ul class="tight" style="font-size: 0.92rem; color: var(--muted);">
+              <li>Income jumps (aid, paychecks)—not a steady monthly check.</li>
+              <li>Tuition, rent, books hit in waves.</li>
+              <li>Typical apps assume “divide by 12.” Semesters don’t work that way.</li>
+            </ul>
+            <p style="margin: 0.75rem 0 0; font-size: 0.9rem;"><strong>Core idea:</strong> It’s a tooling mismatch—not laziness.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="solution">
+      <h2><span class="section-num">2</span> Our system</h2>
+      <p style="margin: 0 0 1rem; color: var(--muted); font-size: 0.95rem;">Lightweight website + simple data store. You type amounts; the app does semester math and gentle warnings.</p>
+
+      <div class="features">
+        <div class="feature">
+          <div class="icon" aria-hidden="true">📅</div>
+          <h3>Semester planner</h3>
+          <p>Tuition, rent, books—dated and chunked across the term.</p>
+        </div>
+        <div class="feature">
+          <div class="icon" aria-hidden="true">💸</div>
+          <h3>Income timeline</h3>
+          <p>Aid drops, work pay, money from home—on a calendar.</p>
+        </div>
+        <div class="feature">
+          <div class="icon" aria-hidden="true">🍕</div>
+          <h3>Weekly tracker</h3>
+          <p>Food, transport, social—fast totals, not 40 micro-categories.</p>
+        </div>
+        <div class="feature">
+          <div class="icon" aria-hidden="true">📊</div>
+          <h3>Dashboard</h3>
+          <p>“Safe to spend this week” after the big bills are counted.</p>
+        </div>
+        <div class="feature">
+          <div class="icon" aria-hidden="true">⚠️</div>
+          <h3>On-page alerts</h3>
+          <p>Flags when your pace might run out before the next inflow.</p>
+        </div>
+        <div class="feature">
+          <div class="icon" aria-hidden="true">✏️</div>
+          <h3>Easy edits</h3>
+          <p>Change numbers when your schedule or job shifts.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1.25rem;">
+        <h3 style="margin: 0 0 0.25rem; font-size: 1rem; font-family: 'Fraunces', serif;">How it flows</h3>
+        <p style="margin: 0 0 0.5rem; font-size: 0.85rem; color: var(--muted);">Six quick steps</p>
+        <div class="steps">
+          <div class="step"><span>Set term dates</span></div>
+          <div class="step"><span>Add inflows + big bills</span></div>
+          <div class="step"><span>See semester map</span></div>
+          <div class="step"><span>Log weekly spend</span></div>
+          <div class="step"><span>Get alerts</span></div>
+          <div class="step"><span>Adjust plan</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1rem;">
+        <h3 style="margin: 0 0 0.35rem; font-size: 1rem; font-family: 'Fraunces', serif;">UI mockup</h3>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--muted);">Wireframe-style preview</p>
+        <div class="mock-frame" aria-label="Dashboard wireframe">
+          <div class="mock-top">
+            <span>Fall term · Week 6</span>
+            <span>~$82 / week OK</span>
+          </div>
+          <div class="mock-bars">
+            <div><small style="color:var(--muted)">Food</small><div class="mock-bar"><span style="width:72%"></span></div></div>
+            <div><small style="color:var(--muted)">Social</small><div class="mock-bar warn"><span style="width:91%"></span></div></div>
+            <div><small style="color:var(--muted)">Transport</small><div class="mock-bar"><span style="width:40%"></span></div></div>
+          </div>
+          <div class="mock-alert">Heads up: social is above pace. Ease up until Nov 1 disbursement.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="strategy">
+      <h2><span class="section-num">3</span> Strategy</h2>
+      <div class="mini-grid">
+        <div class="mini">
+          <strong>Value</strong>
+          <p>Turns messy inputs into time-aware guidance—decision support, not just a spreadsheet.</p>
+        </div>
+        <div class="mini">
+          <strong>Chain</strong>
+          <p>Capture → semester math → dashboard &amp; alerts → you tweak the plan.</p>
+        </div>
+        <div class="mini">
+          <strong>Edge</strong>
+          <p>Built for aid cycles &amp; lumpy bills—generic budgeting apps aren’t.</p>
+        </div>
+        <div class="mini">
+          <strong>Scale</strong>
+          <p>Digital, partner-friendly (clubs, aid office). Room for campus data later.</p>
+        </div>
+      </div>
+      <p style="margin: 1rem 0 0; font-size: 0.9rem; color: var(--muted);">Wins for students (less stress), schools (retention support), families (fewer surprises).</p>
+    </section>
+
+    <section id="impact">
+      <h2><span class="section-num">4</span> Impact</h2>
+      <div class="impact-row">
+        <div class="impact-card org">
+          <h3>Organizations</h3>
+          <p>Shift from only crisis help to earlier, self-serve planning.</p>
+        </div>
+        <div class="impact-card soc">
+          <h3>Society</h3>
+          <p>Young adults practice pacing money when stakes are real but smaller.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="team">
+      <h2><span class="section-num">5</span> Team</h2>
+      <div class="card">
+        <div class="team-grid">
+          <div class="person">
+            <img class="team-photo" src="images/team-1.jpg" alt="" width="140" height="140" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <div class="photo-slot" style="display:none">Your<br/>photo</div>
+            <p class="name">Shruthika K.</p>
+            <p class="role">Deck Design, Organization/Planning</p>
+          </div>
+          <div class="person">
+            <img class="team-photo" src="images/team-2.jpg" alt="" width="140" height="140" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <div class="photo-slot" style="display:none">Your<br/>photo</div>
+            <p class="name">Shreya P.</p>
+            <p class="role">User-design, Building Website, Strategic Analysis</p>
+          </div>
+          <div class="person">
+            <img class="team-photo" src="images/team-3.jpg" alt="" width="140" height="140" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <div class="photo-slot" style="display:none">Your<br/>photo</div>
+            <p class="name">Sara T.</p>
+            <p class="role">System Logic, Identifying Pain Points, Strategic Analysis</p>
+          </div>
+          <div class="person">
+            <img class="team-photo" src="images/team-4.jpg" alt="" width="140" height="140" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <div class="photo-slot" style="display:none">Your<br/>photo</div>
+            <p class="name">Nandini T.</p>
+            <p class="role">Organization, UI/UX Design, Website Code</p>
+          </div>
+        </div>
+        <p style="margin: 1rem 0 0; font-size: 0.88rem; color: var(--muted);"><strong>Process:</strong> short syncs, shared doc for decisions, one place for Figma + drafts.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 by SemesterSpend</p>
+  </footer>
+</body>
+</html>
