@@ -384,6 +384,48 @@
     }
     .impact-card p { margin: 0; font-size: 0.88rem; opacity: 0.92; line-height: 1.4; }
 
+    /* Social theories */
+    .theory-grid {
+      display: grid;
+      gap: 0.85rem;
+    }
+    @media (min-width: 720px) {
+      .theory-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .theory-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1rem 1rem 1.05rem;
+      border-left: 4px solid var(--accent);
+      box-shadow: 0 4px 16px rgba(28, 27, 25, 0.04);
+    }
+    .theory-card:nth-child(2) { border-left-color: var(--accent-2); }
+    .theory-card:nth-child(3) { border-left-color: #bc6c25; }
+    .theory-card .abbr {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--accent);
+      margin: 0 0 0.2rem;
+    }
+    .theory-card:nth-child(2) .abbr { color: var(--accent-2); }
+    .theory-card:nth-child(3) .abbr { color: #a85a1f; }
+    .theory-card h3 {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 0 0 0.45rem;
+      color: var(--ink);
+    }
+    .theory-card p {
+      margin: 0;
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
     /* Team */
     .team-grid {
       display: grid;
@@ -463,6 +505,7 @@
         <a href="#problem">Problem</a>
         <a href="#solution">Solution</a>
         <a href="#strategy">Strategy</a>
+        <a href="#theories">Theories</a>
         <a href="#impact">Impact</a>
         <a href="#team">Team</a>
       </nav>
@@ -613,8 +656,30 @@
       <p style="margin: 1rem 0 0; font-size: 0.9rem; color: var(--muted);">Wins for students (less stress), schools (retention support), families (fewer surprises).</p>
     </section>
 
+    <section id="theories">
+      <h2><span class="section-num">4</span> Social theories</h2>
+      <p style="margin: 0 0 1rem; color: var(--muted); font-size: 0.92rem;">How people might use (or skip) SemesterSpend—and what could go wrong.</p>
+      <div class="theory-grid">
+        <article class="theory-card">
+          <p class="abbr">Technology Acceptance Model</p>
+          <h3>Usefulness &amp; ease</h3>
+          <p>Students are more likely to try the app if it clearly answers “What can I spend this week?” and if logging takes under a few minutes. If entry feels like homework, perceived usefulness drops—even if the math is good.</p>
+        </article>
+        <article class="theory-card">
+          <p class="abbr">Sociotechnical systems</p>
+          <h3>People + process + tech</h3>
+          <p>Budgets live alongside roommates, jobs, mental health, and aid-office dates. SemesterSpend works best when it fits a small habit (e.g., Sunday check-in) and tolerates rough numbers instead of perfect logs.</p>
+        </article>
+        <article class="theory-card">
+          <p class="abbr">Equity &amp; inclusion</p>
+          <h3>Who is helped?</h3>
+          <p>Not everyone has a new phone, private space, or stable housing. A simple web UI and non-shaming alerts matter. Framing should avoid blaming students for structural costs like rent—focus on pacing, not “discipline.”</p>
+        </article>
+      </div>
+    </section>
+
     <section id="impact">
-      <h2><span class="section-num">4</span> Impact</h2>
+      <h2><span class="section-num">5</span> Impact</h2>
       <div class="impact-row">
         <div class="impact-card org">
           <h3>Organizations</h3>
@@ -628,7 +693,7 @@
     </section>
 
     <section id="team">
-      <h2><span class="section-num">5</span> Team</h2>
+      <h2><span class="section-num">6</span> Team</h2>
       <div class="card">
         <div class="team-grid">
           <div class="person">
